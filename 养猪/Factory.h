@@ -5,84 +5,66 @@
 #include <iostream>
 #include "BasicPig.h"
 
-class PigNode;
-using ptrToPig = std::shared_ptr<PigNode>;
-using Pigs = std::vector<ptrToPig>;
+class Pig;
 
 using Time = size_t;	//以天记，30天为一个月，360天为一年（是的我偷懒了）
 
 class Factory
 {
-public://类型定义
+public:
 	using MoneyType = double;
+	using ptrToPig = std::shared_ptr<Pig>;
+	using Pigs = std::vector<ptrToPig>;
 	using SizeType = size_t;
-	static constexpr SizeType nsize = 0xFFFFFFFFFFFFFFFF;
 
-private://数据成员
-	//全动态分配
+private:
 	std::array<Pigs, 3> kindIndex;	//种类索引,按种类存放指向猪的指针
-	std::array<Pigs, 100> pens;	//猪圈索引，按位置存放猪的指针,也是主要索引方式
-	
-	struct Info {//统计信息结构体
-		SizeType totalNum = 0;//猪数量
-		BasicPig::WeightType totalWeight = 0;
-		MoneyType totalValue = 0;
-	};
-	std::array<Info, 100> penInfo;
-	std::array<Info, 3> kindInfo;
-	
+	std::array<Pigs, 100> Pigpens;	//猪圈索引，按位置存放猪的指针,也是主要索引方式
 	MoneyType money;
 
-public://成员函数
-	Factory() :money(1000) {};
+public:
+	Factory();
 	Factory(std::istream&);
 
+	friend std::istream& operator>>(std::istream& is, Factory& fc);
+	friend std::ostream& operator<<(std::ostream& os, const Factory& fc);
 	MoneyType getMoney(void) { return money; }
 	
 	SizeType pigNum(void);
-	SizeType pigNum(BasicPig::Color);
+	SizeType pigNum(BasicPig::Kind);
 	SizeType pigNum(SizeType penNum);
 
-	bool purChase(ptrToPig& victim);
+	void purChase(BasicPig::Kind k, SizeType count);	//批次购买，随机重量
+	void perChase(BasicPig::Kind k, BasicPig::WeightType w);//精准购买
 	
 	void sellOut(void);	//能卖的卖光
 	void sell(SizeType penNum);//按圈卖
-	void sell(BasicPig::Color k);//按种类卖
-	void sell(ptrToPig& p);
+	void sell(BasicPig::Kind k);//按种类卖
 
-	void getInfo(BasicPig::Color k);		//种类信息(数量，总体重）
+	void getInfo(BasicPig::Kind k);		//种类信息(数量，总体重）
 	void getInfo(SizeType penNum);	//按圈信息(数量，种类(是否黑猪)，总体重)
-	void getInfo(SizeType penNum, SizeType num);//某圈某头的信息(种类，体重，入栏时间，所在位置)
-
-	friend Info& operator-=(Info& in, const ptrToPig&);
-	friend Info& operator+=(Info& in, const ptrToPig&);
+	void getInfo(SizeType penNum);//某圈某头的信息(种类，体重，入栏时间，所在位置)
 
 	void step(void);//一天过去，涨体重，得猪瘟
 private:
-	bool distribute(ptrToPig& p);//将买入的猪加入圈索引,返回成功与否
+	void distribute(const ptrToPig &ptr)//将买入的猪加入圈索引
 };
 
-Pigs generate(Factory::SizeType num);
-
-class PigNode
-	:public BasicPig
+class Pig
+	:private BasicPig
 {
 	friend class Factory;
-	friend Pigs generate(Factory::SizeType);
-public:
-	PigNode(Time t, BasicPig::Color k, BasicPig::WeightType w)//位置,时间由distribute分配
-		:BasicPig(k,w), entryTime(t), penNum(Factory::nsize), num(Factory::nsize) {};
-	PigNode(std::istream& is);
+	
+	Pig(Time t, Factory::SizeType penNum, Factory::SizeType num, BasicPig::Kind k, BasicPig::WeightType w)
+		:BasicPig(k,w), entryTime(t), pigPenNum(penNum), num(num) {};
+	Pig(std::istream& is);
 
+	friend std::istream& operator>> (std::istream& is, const Pig& pig);
+	friend std::ostream& operator<< (std::ostream& os, const Pig& pig);
 
-	Factory::MoneyType cost(void) { return purchasePrice[color]; }
-	Factory::MoneyType getValue(void) { return unitSellPrice[color]*weight; }
-	bool isMature();
-private:
-	static constexpr int unitSellPrice[3] = { 15, 7, 6 };
-	static constexpr int purchasePrice[3] = { 15 * 3, 7 * 3, 6 * 3 };
+	Factory::MoneyType value(void) { return weight * unitSellPrice[kind]; }
 
 	Time entryTime;	//入栏时间
-	Factory::SizeType penNum;	//所在猪圈标号
+	Factory::SizeType pigPenNum;	//所在猪圈标号
 	Factory::SizeType num;			//猪圈内部编号
 };
