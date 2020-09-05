@@ -2,12 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include<vector>
+#include <string>
+#include<memory>
 int main(void) {
-	std::ifstream saving;
-	Factory fa(saving);
-	Time t = 0;
-	for (t = 0; 0 != fa.getMoney(); t++) {
+	Factory fa;
+	Pigs toBesold = generate(8);
 
-	}
+	fa.step();
 	return 0;
 }

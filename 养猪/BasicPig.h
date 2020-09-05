@@ -2,19 +2,17 @@
 #include <iostream>
 class BasicPig
 {
-public:
-	static constexpr int unitSellPrice[3] = { 15, 7, 6 };
-	static constexpr int purchasePrice[3] = { 15 * 3, 7 * 3, 6 * 3 };
-	
-	enum Kind { black, stripe, white };
+public:	
+	enum Color { black, stripe, white };
 	using WeightType = double;
-	BasicPig(Kind k, WeightType w) :kind(k), weight(w) {};
+	BasicPig(Color k, WeightType w) :color(k), weight(w),health(true) {};
 
 	WeightType getWeight(void) { return weight; }
-	Kind getKind(void) { return kind; }
-	void gainWeight(void) { weight += double(rand() % 13) / 10; }
-
+	Color getColor(void) { return color; }
+	WeightType gainWeight(void) { WeightType newW = WeightType(rand() % 13) / 10; weight += newW; return newW; }
+	bool isHealthy(void) { return health; }
 protected:
-	Kind kind;			//种类
-	double weight;		//质量
+	Color color;			//种类
+	WeightType weight;		//质量
+	bool health;		//健康与否
 };
