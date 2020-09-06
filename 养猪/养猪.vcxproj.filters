@@ -21,15 +21,24 @@
     <ClInclude Include="BasicPig.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Typedef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Pigs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Factory.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Pig.cpp">
+    <ClCompile Include="control.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="BasicPig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Pigs.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
