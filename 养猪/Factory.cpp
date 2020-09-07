@@ -1,141 +1,179 @@
 #include "Factory.h"
-#include "Pigs.h"
 #include <algorithm>
-/* Old version code
-inline farm::SizeType farm::Factory::pigNum(void) const
+#include <set>
+farm::Factory::Factory(std::istream& is):day(ntime), money(0)
 {
-	return kindIndex[0].;
+	is >> *this;
+}
+farm::SizeType farm::Factory::pigNum(void) const
+{
+	return kindIndex[0].size() + kindIndex[1].size() + kindIndex[2].size();
 }
 
-inline farm::SizeType Factory::pigNum(farm::Color k) const
+farm::SizeType farm::Factory::pigNum(farm::Color c) const
 {
-	return kindInfo[k].totalNum;
+	return kindIndex[c].size();
 }
 
-inline farm::SizeType Factory::pigNum(farm::SizeType penNum) const
+farm::SizeType farm::Factory::pigNum(farm::SizeType penNum) const
 {
-	return penInfo[penNum].totalNum;
+	return pens[penNum].size();
 }
 
-bool Factory::purChase(ptrToPig& victim)
-{
-	if (victim->cost() > money)
+bool farm::Factory::purChase(Pigs::ptrToPig& victim) {
+	if (money < victim->getCost())
 		return false;
+	money -= victim->getCost();
 	if (false == distribute(victim))
 		return false;
-
-	money -= victim->cost();
-
-	const auto kind = victim->getColor();
-	kindIndex[kind].push_back(victim);
-	kindInfo[kind].totalNum++;
-	kindInfo[kind].totalWeight += victim->getWeight();
-	kindInfo[kind].totalValue += victim->getValue();
-
-	const auto penNum = victim->penNum;
-	penInfo[penNum].totalNum++;
-	penInfo[penNum].totalWeight += victim->getWeight();
-	penInfo[penNum].totalValue += victim->getValue();
-
 	return true;
 }
 
-void Factory::sellOut(void)
-{
-	for (farm::SizeType pos = 0; pos < pens.size(); pos++)
-		sell(pos);
+void farm::Factory::sellOut(void) {
+	std::set<farm::SizeType> penNums;
+	for (auto& pigs : kindIndex) {
+		auto newEnd = std::remove_if(pigs.begin(), pigs.end(), [this, &penNums](Pigs::ptrToPig p) {
+			penNums.insert(p->getLocation());
+			return p->isMature(this->getDay()); 
+			});
+
+		pigs.erase(newEnd, pigs.end());
+	}
+	for (auto num : penNums) {
+		auto& pen = pens[num];
+		for (auto iter = pen.begin(); iter != pen.end();)
+			if ((*iter)->isMature(day))
+				iter = pen.erase(iter);
+			else
+				iter++;
+	}
 }
 
-void Factory::sell(farm::SizeType penNum)
+void farm::Factory::step(void)
 {
-	auto& pen = pens[penNum];
-	auto newEnd = std::remove_if(pen.begin(), pen.end(), [](ptrToPig& p) {return p->isMature(); });
-	Pigs toBeSold(newEnd, pen.end());
-//	std::for_each(toBeSold.begin(), toBeSold.end(), static_cast<void (Factory::*)(ptrToPig&)> (&Factory::sell));
-}
-
-void Factory::sell(farm::Color k)
-{
-	auto& color = kindIndex[k];
-	auto newEnd = std::remove_if(color.begin(), color.end(), [](ptrToPig &p) {return p->isMature(); });
-	Pigs toBeSold(newEnd, color.end());
-//	std::for_each(toBeSold.begin(), toBeSold.end(), static_cast<void (Factory::*)(ptrToPig&)> (&Factory::sell));
-
-}
-
-void Factory::sell(ptrToPig& p)
-{
-	const farm::SizeType penNum = p->penNum;
-	const farm::MoneyType value = p->getValue();
-	const farm::WeightType weight = p->getWeight();
-
-	auto& pen = pens[penNum];
-	pen.erase(find(pen.begin(), pen.end(), p));
-	penInfo[penNum].totalNum--;
-	penInfo[penNum].totalValue -= value;
-	penInfo[penNum].totalWeight -= weight;
-
-	auto& col = kindIndex[p->color];
-	col.erase(find(col.begin(), col.end(), p));
-	kindInfo[p->color].totalNum--;
-	kindInfo[p->color].totalValue -= value;
-	kindInfo[p->color].totalWeight -= weight;
-
-	money += value;
-}
-
-std::ostream& operator<<(std::ostream& os, const Pigs& ps)
-{
-	std::cout << "We have " << ps.size() << " Pigs int this set." << std::endl;
-	for (const auto& pig : ps)
-		std::cout << *pig << std::endl;
-	return std::cout;
-}
-
-std::ostream& operator<<(std::ostream& os, const Factory& fa)
-{
-	std::cout << "We have " << fa.pigNum() << " in this factory" << std::endl;
-	for (Factory::SizeType pos=0; pos<100; pos++)
-		if (!fa.pens[pos].empty())
-			std::cout << "In pen:" << pos << std::endl << fa.pens[pos] << std::endl;
-	return std::cout;
-}
-
-void Factory::step(void)
-{
-	for (auto& color : kindIndex)
-		for (auto& pig : color) {
-			MoneyType dValue = pig->getValue();
-			BasicPig::WeightType dWei = pig->gainWeight();
-			dValue -= pig->getValue();
-			kindInfo[pig->color].totalWeight += dWei;
-			kindInfo[pig->color].totalValue += dValue;
-			penInfo[pig->color].totalWeight += dWei;
-			penInfo[pig->color].totalValue += dValue;
+	farm::WeightType a[3] = { 0,0,0 };
+	farm::MoneyType b[3] = { 0,0,0 };
+	for (auto& pen : pens)
+		for (auto& pig : pen) {
+			const farm::WeightType dw = pig->gainWeight();
+			const farm::MoneyType dv = dw * BasicPig::getUnitValue(pig->getColor());
+			pen.totalWeight += dw;
+			pen.totalValue += dv;
+			a[pig->getColor()] += dw;
+			b[pig->getColor()] += dv;
 		}
+	kindIndex[0].totalWeight += a[0];
+	kindIndex[0].totalValue += b[0];
+	kindIndex[1].totalWeight += a[1];
+	kindIndex[1].totalValue += b[1];
+	kindIndex[2].totalWeight += a[2];
+	kindIndex[2].totalValue += b[2];
+
+	if (5 > rand() % 1000) {//每天有0.5%的可能爆发新猪瘟
+		const farm::SizeType pos = rand() % 100;
+		quarantine.insert(pos);
+		std::cout << "新疫情爆发于" << pos << "号猪圈！" << std::endl;
+	}
+
+	std::vector<farm::SizeType> newpos;
+	for (auto qua = quarantine.begin(); qua != quarantine.end();) {
+		auto &pen = pens[*qua];
+		for (auto iter = pen.begin(); iter != pen.end();)//本圈50%感染
+			if ((*iter)->isdying(day)) {
+				kindIndex[(*iter)->getColor()].erase(*iter);
+				iter = pen.erase(iter);
+			}
+			else {
+				if(!(*iter)->isHealthy() && (rand() & 1)) {
+					(*iter)->setIll(day);
+					pen.illNum++;
+					kindIndex[(*iter)->getColor()].illNum++;
+				}
+				iter++;
+			}
+
+		if(*qua>=1)
+		for (auto iter = pens[*qua-1].begin(); iter != pens[*qua-1].end();)//邻居圈15%感染
+			if ((*iter)->isdying(day)) {
+				kindIndex[(*iter)->getColor()].erase(*iter);
+				iter = pen.erase(iter);
+			}
+			else {
+				if (!(*iter)->isHealthy() && (rand()%100 < 15)) {
+					(*iter)->setIll(day);
+					pen.illNum++;
+					newpos.push_back(*qua - 1);
+					kindIndex[(*iter)->getColor()].illNum++;
+				}
+				iter++;
+			}
+		if (*qua <= 100)
+			for (auto iter = pens[*qua + 1].begin(); iter != pens[*qua + 1].end();)//邻居圈15%感染
+				if ((*iter)->isdying(day)) {
+					kindIndex[(*iter)->getColor()].erase(*iter);
+					iter = pen.erase(iter);
+				}
+				else {
+					if (!(*iter)->isHealthy() && (rand() % 100 < 15)) {
+						(*iter)->setIll(day);
+						pen.illNum++;
+						newpos.push_back(*qua + 1);
+						kindIndex[(*iter)->getColor()].illNum++;
+					}
+					iter++;
+				}
+		if (pen.empty()) qua = quarantine.erase(qua);
+		else qua++;
+	}
+	for (auto pos : newpos)
+		quarantine.insert(pos);
+	day++;
 }
 
-bool Factory::distribute(ptrToPig& p)
-{
+bool farm::Factory::distribute(Pigs::ptrToPig& p) {
 	farm::SizeType pos;
 	std::vector<farm::SizeType> ablePos;
-	
+
 	for (pos = 0; pos < pens.size(); pos++) {
-		if (pens[pos].empty()) {
+		auto& pen = pens[pos];
+		if (pen.empty()) {
 			ablePos.push_back(pos);
 			continue;
 		}
-		if ((farm::black == p->color && farm::black == pens[pos][0]->color) ||
-			(farm::black == p->color && farm::black == pens[pos][0]->color))
+		if ((farm::black == p->getColor() && farm::black == pen[0]->getColor()) ||
+			(farm::black == p->getColor() && farm::black == pen[0]->getColor()) 
+			&& !pen.getIllNum() && pen.size()<9)
 			ablePos.push_back(pos);
 	}
-	
+
 	if (ablePos.empty())
 		return false;
-
 	pos = ablePos[rand() % ablePos.size()];
-	p->penNum = pos;
-	pens[pos].push_back(p);
+	p->set(day, pos);
+	pens[pos].add(p);
+	kindIndex[p->getColor()].add(p);
 	return true;
 }
-*/
+
+std::istream& farm::operator>>(std::istream& is, Factory& fa)
+{
+	farm::SizeType pigNum;
+	is >> pigNum >> fa.money;
+	Pigs tmp;
+	while(is >> tmp)
+	for (auto& pig : tmp) {
+		fa.kindIndex[pig->getColor()].add(pig);
+		fa.pens[pig->getLocation()].add(pig);
+	}
+	return is;
+}
+
+std::ostream& farm::operator<<(std::ostream& os, const Factory& fa)
+{
+	os << /*"We have " <<*/ fa.pigNum() << ' ';//" pigs in this factory." << std::endl;
+	os << /*"We have  <<*/ fa.money << /*" yuans" <<*/ std::endl;
+	for (const auto& pigs : fa.pens)
+		if (!pigs.empty())
+			os <<  pigs << std::endl;
+	return os;
+}

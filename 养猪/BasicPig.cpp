@@ -1,11 +1,11 @@
 #include "BasicPig.h"
 #include <cstring>
-constexpr char const* colorName[]{ "black","stripe","white" };
-constexpr char const* healthName[]{ "ill","healthy" };
+static constexpr  char const* colorName[]{ "black","stripe","white" };
+static constexpr char const* healthName[]{ "ill","healthy" };
 std::ostream& operator<<(std::ostream& os, const BasicPig& p)
 {
-	return os << colorName[p.color] << "   " << p.weight << "   "
-		<< healthName[p.health] << "   " << BasicPig::getUnitCost(p.color) * p.weight;
+	return os << colorName[p.color] << "   " << p.weight << "   " << p.penNum << ' ' << p.entryTime << ' '
+		<< healthName[p.health] << "   " << p.illTime;
 }
 
 std::istream& operator>>(std::istream& is, BasicPig& p)
@@ -17,11 +17,11 @@ std::istream& operator>>(std::istream& is, BasicPig& p)
 			p.color = static_cast<farm::Color>(i);
 			break;
 		}
-	p.health = static_cast<bool>(strncmp(healthName[1], healthIn, 3));
+	p.health = static_cast<bool>(strncmp(healthName[0], healthIn, 3));
 	return is;
 }
 
-BasicPig::BasicPig(std::istream& is)
+BasicPig::BasicPig(std::istream& is):BasicPig()
 {
 	is >> *this;
 }

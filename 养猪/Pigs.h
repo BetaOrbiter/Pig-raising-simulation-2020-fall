@@ -3,27 +3,42 @@
 #include "BasicPig.h"
 #include <vector>
 #include <iostream>
-#include <algorithm>
 
 namespace farm {
 	class Pigs {//包含了猪群的简略信息与索引
-				//封装vector类，添加了几个统计信息
-		using ptrToPig = std::shared_ptr<BasicPig>;
-	public:
-		Pigs(Time t = ntime, SizeType num = 0);//随机生成一批猪，必须指定时间
-
+				//使Factory不那么复杂
+				//封装vector类，添加了几个统计信息,由本类与Factory共同维护
+		friend class Factory;
 		friend std::istream& operator>>(std::istream&, farm::Pigs&);
 		friend std::ostream& operator<<(std::ostream&, const farm::Pigs&);
 
+	public:
+		using ptrToPig = std::shared_ptr<BasicPig>;
+	private:
+		using iterator = std::vector<ptrToPig>::iterator;
+		using riterator = std::vector<ptrToPig>::reverse_iterator;
+	
+	public:
+		Pigs(SizeType num = 0);//随机生成一批猪，时间，位置分配时指定
+
 		farm::MoneyType getValue(void) const { return totalValue; }
 		farm::WeightType getWeight(void) const { return totalWeight; }
-		farm::WeightType getNum(void) const { return Index.size(); }
+		farm::SizeType getIllNum(void) const { return illNum; }
+
+		bool empty(void) const { return Index.empty(); }
+		farm::SizeType size(void) const { return Index.size(); }
+		ptrToPig& operator[](farm::SizeType s) { return Index[s]; }
+		iterator begin() {return Index.begin();}
+		iterator end() { return Index.end(); }
+//		riterator rbegin() { return Index.rbegin(); }
+//		riterator rend() { return Index.rend(); }
 
 		Pigs& add(ptrToPig& ptr);
+		iterator erase(iterator beg, iterator end);
+		iterator erase(iterator target);
 		Pigs& erase(const farm::SizeType pos);
 		Pigs& erase(const farm::Pigs::ptrToPig& ptr);
 	private:
-
 		farm::WeightType totalWeight;
 		farm::MoneyType totalValue;
 		std::vector<ptrToPig> Index;
@@ -31,5 +46,5 @@ namespace farm {
 	};
 
 	std::istream& operator>>(std::istream&, farm::Pigs&);
-	std::ostream& operator<< (std::ostream&, farm::Pigs&);
+	std::ostream& operator<< (std::ostream&,const farm::Pigs&);
 }
