@@ -3,37 +3,37 @@
 #include "Typedef.h"
 class BasicPig
 {
-public:	//½Ó¿Ú
+public:	//æ¥å£
 	BasicPig(farm::Color c = static_cast<farm::Color>(rand()%3), farm::WeightType w = rand()%40+60)
-		:color(c),weight(w), health(true), penNum(farm::nsize), entryTime(ntime), illTime(ntime) {};//Î»ÖÃÊ±¼äÔÚ·ÖÅäÊ±Ğ´Èë
-	BasicPig(std::istream& is);//´ÓÁ÷ÖĞ´´½¨£¬Ê¹ÓÃ>>ÔËËã·û
+		:color(c),weight(w), health(true), penNum(farm::nsize), entryTime(ntime), illTime(ntime) {};//ä½ç½®æ—¶é—´åœ¨åˆ†é…æ—¶å†™å…¥
+	BasicPig(std::istream& is);//ä»æµä¸­åˆ›å»ºï¼Œä½¿ç”¨>>è¿ç®—ç¬¦
 
-	static constexpr int getUnitCost(farm::Color c) { return unitCost[c]; }						//·µ»Øµ¥Î»¹ºÂò³É±¾
-	static constexpr int getUnitValue(farm::Color c) { return unitSellPrice[c]; }				//·µ»Øµ¥Î»ÊÛ¼Û
+	static constexpr int getUnitCost(farm::Color c) { return unitCost[c]; }						//è¿”å›å•ä½è´­ä¹°æˆæœ¬
+	static constexpr int getUnitValue(farm::Color c) { return unitSellPrice[c]; }				//è¿”å›å•ä½å”®ä»·
 
-	bool isMature(const Time& nowTime) {return ((nowTime-entryTime) >= 90) || (weight>=150);}	//µ±Ç°ÊÇ·ñ³ÉÊì
+	bool isMature(const Time& nowTime) {return ((nowTime-entryTime) >= 90) || (weight>=150);}	//å½“å‰æ˜¯å¦æˆç†Ÿ
 	farm::MoneyType getCost(void) const { return unitCost[color] * weight; }
-	farm::MoneyType getValue(void) const { return unitSellPrice[color] * weight; }				//µ±Ç°ÊÛ¼Û
-	farm::WeightType getWeight(void) const { return weight; }									//µ±Ç°ÌåÖØ
-	farm::Color getColor(void) const { return color; }											//ÑÕÉ«Æ·ÖÖ
-	farm::SizeType getLocation()const { return penNum; }										//ËùÔÚÖíÈ¦±àºÅ
-	farm::WeightType gainWeight(void)															//Ôö³¤ÌåÖØ
+	farm::MoneyType getValue(void) const { return unitSellPrice[color] * weight; }				//å½“å‰å”®ä»·
+	farm::WeightType getWeight(void) const { return weight; }									//å½“å‰ä½“é‡
+	farm::Color getColor(void) const { return color; }											//é¢œè‰²å“ç§
+	farm::SizeType getLocation()const { return penNum; }										//æ‰€åœ¨çŒªåœˆç¼–å·
+	farm::WeightType gainWeight(void)															//å¢é•¿ä½“é‡
 		{ farm::WeightType newW = static_cast<farm::WeightType>(rand() % 13) / 10;
 			weight += newW;return newW; }
-	void set(Time& t, farm::SizeType pen) { entryTime = t; penNum = pen; }						//ÀÓÖí£¬ÀÓÏÂÈëÀ¸Ê±¼äÓëÈ¦ºÅ
-	void setIll(Time t) { health = false; entryTime = t; }										//ÉèÎªÉú²¡
-	bool isHealthy(void) const { return health; }												//ÊÇ·ñ½¡¿µ
-	bool isdying(Time t) { return t - illTime > 3; }											//·¢²¡ÈıÌìËÀÍö
+	void set(Time& t, farm::SizeType pen) { entryTime = t; penNum = pen; }						//çƒ™çŒªï¼Œçƒ™ä¸‹å…¥æ æ—¶é—´ä¸åœˆå·
+	void setIll(Time t) { health = false; entryTime = t; }										//è®¾ä¸ºç”Ÿç—…
+	bool isHealthy(void) const { return health; }												//æ˜¯å¦å¥åº·
+	bool isdying(Time t) { return (t - illTime) > 10; }											//å‘ç—…ä¸‰å¤©æ­»äº¡
 	friend std::ostream& operator<<(std::ostream&,const BasicPig&);
-	friend std::istream& operator>>(std::istream&, BasicPig&);		//ÖÖÀà ÖÊÁ¿ ÖíÈ¦±àºÅ ÈëÀ¸Ê±¼ä ½¡¿µ×´Ì¬ Éú²¡Ê±¼ä£¬²»¿ÉÈ±ÉÙ
-private://Êı¾İ³ÉÔ±
+	friend std::istream& operator>>(std::istream&, BasicPig&);		//ç§ç±» è´¨é‡ çŒªåœˆç¼–å· å…¥æ æ—¶é—´ å¥åº·çŠ¶æ€ ç”Ÿç—…æ—¶é—´ï¼Œä¸å¯ç¼ºå°‘
+private://æ•°æ®æˆå‘˜
 	static constexpr int unitSellPrice[3] = { 15, 7, 6 };
 	static constexpr int unitCost[3] = { 20, 10, 9 };
 
-	farm::Color color;			//ÖÖÀà
-	farm::WeightType weight;	//ÖÊÁ¿
-	farm::SizeType penNum;		//ËùÔÚÖíÈ¦±êºÅ
-	Time entryTime;				//ÈëÀ¸Ê±¼ä
-	bool health;				//½¡¿µÓë·ñ
-	Time illTime;				//Éú²¡Ê±¼ä
+	farm::Color color;			//ç§ç±»
+	farm::WeightType weight;	//è´¨é‡
+	farm::SizeType penNum;		//æ‰€åœ¨çŒªåœˆæ ‡å·
+	Time entryTime;				//å…¥æ æ—¶é—´
+	bool health;				//å¥åº·ä¸å¦
+	Time illTime;				//ç”Ÿç—…æ—¶é—´
 };

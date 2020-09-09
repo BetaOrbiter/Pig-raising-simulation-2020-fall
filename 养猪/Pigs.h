@@ -5,9 +5,9 @@
 #include <iostream>
 
 namespace farm {
-	class Pigs {//°üº¬ÁËÖíÈºµÄ¼òÂÔĞÅÏ¢ÓëË÷Òı
-				//Ê¹Factory²»ÄÇÃ´¸´ÔÓ
-				//·â×°vectorÀà£¬Ìí¼ÓÁË¼¸¸öÍ³¼ÆĞÅÏ¢,ÓÉ±¾ÀàÓëFactory¹²Í¬Î¬»¤
+	class Pigs {//åŒ…å«äº†çŒªç¾¤çš„ç®€ç•¥ä¿¡æ¯ä¸ç´¢å¼•
+				//ä½¿Factoryä¸é‚£ä¹ˆå¤æ‚
+				//å°è£…vectorç±»ï¼Œæ·»åŠ äº†å‡ ä¸ªç»Ÿè®¡ä¿¡æ¯,ç”±æœ¬ç±»ä¸Factoryå…±åŒç»´æŠ¤
 		friend class Factory;
 		friend std::istream& operator>>(std::istream&, farm::Pigs&);
 		friend std::ostream& operator<<(std::ostream&, const farm::Pigs&);
@@ -19,7 +19,7 @@ namespace farm {
 		using riterator = std::vector<ptrToPig>::reverse_iterator;
 	
 	public:
-		Pigs(SizeType num = 0);//Ëæ»úÉú³ÉÒ»ÅúÖí£¬Ê±¼ä£¬Î»ÖÃ·ÖÅäÊ±Ö¸¶¨
+		Pigs(SizeType num = 0);//éšæœºç”Ÿæˆä¸€æ‰¹çŒªï¼Œæ—¶é—´ï¼Œä½ç½®åˆ†é…æ—¶æŒ‡å®š
 
 		farm::MoneyType getValue(void) const { return totalValue; }
 		farm::WeightType getWeight(void) const { return totalWeight; }
@@ -34,10 +34,11 @@ namespace farm {
 //		riterator rend() { return Index.rend(); }
 
 		Pigs& add(ptrToPig& ptr);
+		void clear(void);
 		iterator erase(iterator beg, iterator end);
 		iterator erase(iterator target);
-		Pigs& erase(const farm::SizeType pos);
-		Pigs& erase(const farm::Pigs::ptrToPig& ptr);
+		iterator erase(const farm::SizeType pos);
+		iterator erase(const farm::Pigs::ptrToPig& ptr);
 	private:
 		farm::WeightType totalWeight;
 		farm::MoneyType totalValue;

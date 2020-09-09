@@ -14,7 +14,8 @@ farm::Pigs::iterator farm::Pigs::erase(iterator beg, iterator end)
 {
 	for (auto iter = beg; iter != end; iter++) {
 		totalValue -= (*iter)->getValue();
-		totalWeight -= (*iter)->getValue();
+		totalWeight -= (*iter)->getWeight();
+		illNum -= !(*iter)->isHealthy();
 	}
 	return Index.erase(beg, end);
 }
@@ -23,6 +24,7 @@ farm::Pigs::iterator farm::Pigs::erase(iterator target)
 {
 	totalValue -= (*target)->getValue();
 	totalWeight -= (*target)->getWeight();
+	illNum -= !(*target)->isHealthy();
 	return Index.erase(target);
 }
 
@@ -35,26 +37,36 @@ farm::Pigs& farm::Pigs::add(ptrToPig& ptr)
 	return *this;
 }
 
-farm::Pigs& farm::Pigs::erase(const farm::SizeType pos)
+void farm::Pigs::clear(void)
 {
-	const auto ptrToPtr = Index.begin() + pos;
-	totalValue -= (*ptrToPtr)->getValue();
-	totalWeight -= (*ptrToPtr)->getWeight();
-	illNum -= !(*ptrToPtr)->isHealthy();
-	Index.erase(ptrToPtr);
-	return *this;
+	totalValue = 0;
+	totalWeight = 0;
+	illNum = 0;
+	Index.clear();
 }
 
-farm::Pigs& farm::Pigs::erase(const ptrToPig& ptr)
+farm::Pigs::iterator farm::Pigs::erase(const farm::SizeType pos)
 {
-	const auto ptrToPtr = std::find(Index.begin(), Index.end(), ptr);
+	auto ptrToPtr = Index.begin() + pos;
 	if (ptrToPtr != Index.end()) {
 		totalValue -= (*ptrToPtr)->getValue();
 		totalWeight -= (*ptrToPtr)->getWeight();
 		illNum -= !(*ptrToPtr)->isHealthy();
-		Index.erase(ptrToPtr);
+		ptrToPtr = Index.erase(ptrToPtr);
 	}
-	return *this;
+	return ptrToPtr;
+}
+
+farm::Pigs::iterator farm::Pigs::erase(const ptrToPig& ptr)
+{
+	auto ptrToPtr = std::find(Index.begin(), Index.end(), ptr);
+	if (ptrToPtr != Index.end()) {
+		totalValue -= (*ptrToPtr)->getValue();
+		totalWeight -= (*ptrToPtr)->getWeight();
+		illNum -= !(*ptrToPtr)->isHealthy();
+		ptrToPtr = Index.erase(ptrToPtr);
+	}
+	return ptrToPtr;
 }
 
 std::istream& farm::operator>>(std::istream& is, farm::Pigs& ps)

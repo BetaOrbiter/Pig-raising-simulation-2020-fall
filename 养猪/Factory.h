@@ -7,14 +7,14 @@
 namespace farm {
 	class Factory
 	{
-	private://Êı¾İ³ÉÔ±
+	private://æ•°æ®æˆå‘˜
 
-		std::array<Pigs, 3> kindIndex;	//ÖÖÀàË÷Òı,°´ÖÖÀà´æ·ÅÖ¸ÏòÖíµÄÖ¸Õë
-		std::array<Pigs, 100> pens;	//ÖíÈ¦Ë÷Òı£¬°´Î»ÖÃ´æ·ÅÖíµÄÖ¸Õë,Ò²ÊÇÖ÷ÒªË÷Òı·½Ê½
+		std::array<Pigs, 3> kindIndex;	//ç§ç±»ç´¢å¼•,æŒ‰ç§ç±»å­˜æ”¾æŒ‡å‘çŒªçš„æŒ‡é’ˆ
+		std::array<Pigs, 100> pens;	//çŒªåœˆç´¢å¼•ï¼ŒæŒ‰ä½ç½®å­˜æ”¾çŒªçš„æŒ‡é’ˆ,ä¹Ÿæ˜¯ä¸»è¦ç´¢å¼•æ–¹å¼
 		std::set <farm::SizeType> quarantine;
 		farm::MoneyType money;
 		Time day;
-	public://³ÉÔ±º¯Êı
+	public://æˆå‘˜å‡½æ•°
 		Factory(farm::MoneyType m = 10000) :money(m),day(0) {};
 		Factory(std::istream&);
 
@@ -29,10 +29,12 @@ namespace farm {
 
 		bool purChase(Pigs::ptrToPig & victim);
 
-		void sellOut(void);	//ÄÜÂôµÄÂô¹â
-		void sell(farm::SizeType penNum);//°´È¦Âô
-		void sell(farm::Color k);//°´ÖÖÀàÂô
+		void sellOut(void);	//èƒ½å–çš„å–å…‰
+		void sell(farm::SizeType penNum);//æŒ‰åœˆå–
+		void sell(farm::Color k);//æŒ‰ç§ç±»å–
 		void sell(Pigs::ptrToPig& p);
+
+		void kill(farm::SizeType penNum);//æ‰‘æ€
 
 		Pigs& operator[](const farm::SizeType penNum) { return pens[penNum]; }
 		Pigs& operator[](const farm::Color col) { return kindIndex[col]; }
@@ -40,9 +42,10 @@ namespace farm {
 		friend std::ostream& operator<<(std::ostream& os, const Factory& fa);
 		friend std::istream& operator>>(std::istream& is, Factory& fa);
 
-		void step(void);//Ò»Ìì¹ıÈ¥£¬ÕÇÌåÖØ£¬µÃÖíÎÁ
+		void step(void);//ä¸€å¤©è¿‡å»ï¼Œæ¶¨ä½“é‡ï¼Œå¾—çŒªç˜Ÿ
 	private:
-		bool distribute(Pigs::ptrToPig& p);//½«ÂòÈëµÄÖí¼ÓÈëÈ¦Ë÷Òı,ÌîÈëÊ±¼ä,·µ»Ø³É¹¦Óë·ñ
+		bool spread(const farm::SizeType& pos,const int possibility);//åœ¨pens[pos]ä¼ æŸ“ç—…æ¯’ï¼Œæœºç‡ä»0åˆ°100
+		bool distribute(Pigs::ptrToPig& p);//å°†ä¹°å…¥çš„çŒªåŠ å…¥åœˆç´¢å¼•,å¡«å…¥æ—¶é—´,è¿”å›æˆåŠŸä¸å¦
 	};
 	std::istream& operator>> (std::istream& is, Factory& fa);
 	std::ostream& operator<<(std::ostream& os, const Factory& fa);

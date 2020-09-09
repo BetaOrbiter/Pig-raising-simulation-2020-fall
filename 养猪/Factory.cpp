@@ -32,11 +32,15 @@ bool farm::Factory::purChase(Pigs::ptrToPig& victim) {
 void farm::Factory::sellOut(void) {
 	std::set<farm::SizeType> penNums;
 	for (auto& pigs : kindIndex) {
-		auto newEnd = std::remove_if(pigs.begin(), pigs.end(), [this, &penNums](Pigs::ptrToPig p) {
-			penNums.insert(p->getLocation());
-			return p->isMature(this->getDay()); 
+		auto newEnd = std::partition(pigs.begin(), pigs.end(), [this, &penNums](Pigs::ptrToPig p) {
+			if (p->isMature(day) && p->isHealthy() && !pens[p->getLocation()].getIllNum()) {
+				penNums.insert(p->getLocation());
+				return false;
+			}
+			return true; 
 			});
 
+		std::for_each(newEnd, pigs.end(), [this](const Pigs::ptrToPig& ptr) {money += ptr->getValue(); });
 		pigs.erase(newEnd, pigs.end());
 	}
 	for (auto num : penNums) {
@@ -49,80 +53,118 @@ void farm::Factory::sellOut(void) {
 	}
 }
 
+void farm::Factory::sell(farm::SizeType penNum)
+{
+	auto& pen = pens[penNum];
+	if (!pen.illNum) {
+		for (auto& pig : pen) {
+			kindIndex[pig->getColor()].erase(pig);
+			money += pig->getValue();
+		}
+		pen.clear();
+	}
+}
+
+void farm::Factory::sell(farm::Color k)
+{
+	std::set<farm::SizeType> penNums;
+	auto& pigs = kindIndex[k];
+	auto newEnd = std::partition(pigs.begin(), pigs.end(), [this, &penNums](Pigs::ptrToPig p) {
+		if (p->isMature(day) && p->isHealthy() && !pens[p->getLocation()].getIllNum()) {
+			penNums.insert(p->getLocation());
+			return true;
+		}
+		return false;
+		});
+	std::for_each(newEnd, pigs.end(), [this](const Pigs::ptrToPig& ptr) {money += ptr->getValue(); });
+	pigs.erase(newEnd, pigs.end());
+
+	for (auto num : penNums) {
+		auto& pen = pens[num];
+		for (auto iter = pen.begin(); iter != pen.end();)
+			if ((*iter)->isMature(day) && (*iter)->isHealthy() && (*iter)->getColor()==k)
+				iter = pen.erase(iter);
+			else
+				iter++;
+	}
+}
+
+void farm::Factory::sell(Pigs::ptrToPig& p)
+{
+	if (p->isMature(day) && p->isHealthy() && !pens[p->getLocation()].getIllNum()) {
+		money += p->getValue();
+		kindIndex[p->getColor()].erase(p);
+		pens[p->getLocation()].erase(p);
+	}
+}
+
+void farm::Factory::kill(farm::SizeType penNum)
+{
+	quarantine.erase(penNum);
+	auto& pen = pens[penNum];
+	for (auto& pig : pen)
+		kindIndex[pig->getColor()].erase(pig);
+	pen.clear();
+}
+
+bool farm::Factory::spread(const farm::SizeType& pos, const int possibility) {
+	auto& pen = pens[pos];
+	bool flg = false;
+	for (auto iter = pen.begin(); iter != pen.end();)
+		if ((*iter)->isdying(day)) {
+			kindIndex[(*iter)->getColor()].erase(*iter);
+			iter = pen.erase(iter);
+		}
+		else {
+			if ((*iter)->isHealthy() && (rand()%100 < possibility)) {
+				flg = true;
+				(*iter)->setIll(day);
+				pen.illNum++;
+				kindIndex[(*iter)->getColor()].illNum++;
+			}
+			iter++;
+		}
+	return true;
+}
+
 void farm::Factory::step(void)
 {
-	farm::WeightType a[3] = { 0,0,0 };
-	farm::MoneyType b[3] = { 0,0,0 };
-	for (auto& pen : pens)
-		for (auto& pig : pen) {
+	farm::WeightType a[100] = { 0 };
+	farm::MoneyType b[100] = { 0 };
+	for (auto& k : kindIndex)
+		for (auto& pig : k) {
 			const farm::WeightType dw = pig->gainWeight();
 			const farm::MoneyType dv = dw * BasicPig::getUnitValue(pig->getColor());
-			pen.totalWeight += dw;
-			pen.totalValue += dv;
-			a[pig->getColor()] += dw;
-			b[pig->getColor()] += dv;
+			k.totalWeight += dw;
+			k.totalValue += dv;
+			a[pig->getLocation()] += dw;
+			b[pig->getLocation()] += dv;
 		}
-	kindIndex[0].totalWeight += a[0];
-	kindIndex[0].totalValue += b[0];
-	kindIndex[1].totalWeight += a[1];
-	kindIndex[1].totalValue += b[1];
-	kindIndex[2].totalWeight += a[2];
-	kindIndex[2].totalValue += b[2];
+	for (int i = 0; i < 100; i++) {
+		pens[i].totalWeight += a[i];
+		pens[i].totalValue += b[i];
+	}
 
-	if (5 > rand() % 1000) {//Ã¿ÌìÓĞ0.5%µÄ¿ÉÄÜ±¬·¢ĞÂÖíÎÁ
-		const farm::SizeType pos = rand() % 100;
+
+	if (5 > rand() % 1000) {//æ¯å¤©æœ‰0.5%çš„å¯èƒ½çˆ†å‘æ–°çŒªç˜Ÿ
+		farm::SizeType pos = rand() % 100;
+		while (pens[pos].empty())
+			pos = rand() % 100;
 		quarantine.insert(pos);
-		std::cout << "ĞÂÒßÇé±¬·¢ÓÚ" << pos << "ºÅÖíÈ¦£¡" << std::endl;
+		//std::cout << "æ–°ç–«æƒ…çˆ†å‘äº" << pos << "å·çŒªåœˆï¼" << std::endl;
 	}
 
 	std::vector<farm::SizeType> newpos;
 	for (auto qua = quarantine.begin(); qua != quarantine.end();) {
-		auto &pen = pens[*qua];
-		for (auto iter = pen.begin(); iter != pen.end();)//±¾È¦50%¸ĞÈ¾
-			if ((*iter)->isdying(day)) {
-				kindIndex[(*iter)->getColor()].erase(*iter);
-				iter = pen.erase(iter);
-			}
-			else {
-				if(!(*iter)->isHealthy() && (rand() & 1)) {
-					(*iter)->setIll(day);
-					pen.illNum++;
-					kindIndex[(*iter)->getColor()].illNum++;
-				}
-				iter++;
-			}
-
-		if(*qua>=1)
-		for (auto iter = pens[*qua-1].begin(); iter != pens[*qua-1].end();)//ÁÚ¾ÓÈ¦15%¸ĞÈ¾
-			if ((*iter)->isdying(day)) {
-				kindIndex[(*iter)->getColor()].erase(*iter);
-				iter = pen.erase(iter);
-			}
-			else {
-				if (!(*iter)->isHealthy() && (rand()%100 < 15)) {
-					(*iter)->setIll(day);
-					pen.illNum++;
-					newpos.push_back(*qua - 1);
-					kindIndex[(*iter)->getColor()].illNum++;
-				}
-				iter++;
-			}
-		if (*qua <= 100)
-			for (auto iter = pens[*qua + 1].begin(); iter != pens[*qua + 1].end();)//ÁÚ¾ÓÈ¦15%¸ĞÈ¾
-				if ((*iter)->isdying(day)) {
-					kindIndex[(*iter)->getColor()].erase(*iter);
-					iter = pen.erase(iter);
-				}
-				else {
-					if (!(*iter)->isHealthy() && (rand() % 100 < 15)) {
-						(*iter)->setIll(day);
-						pen.illNum++;
-						newpos.push_back(*qua + 1);
-						kindIndex[(*iter)->getColor()].illNum++;
-					}
-					iter++;
-				}
-		if (pen.empty()) qua = quarantine.erase(qua);
+		spread(*qua, 50);
+		if (*qua >= 1)
+			if (spread(*qua - 1, 15))
+				newpos.push_back(*qua - 1);
+		if (*qua < 99)
+			if (spread(*qua + 1, 15))
+				newpos.push_back(*qua + 1);
+		
+		if (pens[*qua].empty()) qua = quarantine.erase(qua);
 		else qua++;
 	}
 	for (auto pos : newpos)
@@ -140,8 +182,8 @@ bool farm::Factory::distribute(Pigs::ptrToPig& p) {
 			ablePos.push_back(pos);
 			continue;
 		}
-		if ((farm::black == p->getColor() && farm::black == pen[0]->getColor()) ||
-			(farm::black == p->getColor() && farm::black == pen[0]->getColor()) 
+		if (((farm::black == p->getColor() && farm::black == pen[0]->getColor()) ||
+			(farm::black != p->getColor() && farm::black != pen[0]->getColor())) 
 			&& !pen.getIllNum() && pen.size()<9)
 			ablePos.push_back(pos);
 	}
@@ -158,7 +200,7 @@ bool farm::Factory::distribute(Pigs::ptrToPig& p) {
 std::istream& farm::operator>>(std::istream& is, Factory& fa)
 {
 	farm::SizeType pigNum;
-	is >> pigNum >> fa.money;
+	is >> fa.day >> pigNum >> fa.money;
 	Pigs tmp;
 	while(is >> tmp)
 	for (auto& pig : tmp) {
@@ -170,8 +212,7 @@ std::istream& farm::operator>>(std::istream& is, Factory& fa)
 
 std::ostream& farm::operator<<(std::ostream& os, const Factory& fa)
 {
-	os << /*"We have " <<*/ fa.pigNum() << ' ';//" pigs in this factory." << std::endl;
-	os << /*"We have  <<*/ fa.money << /*" yuans" <<*/ std::endl;
+	os << fa.day << ' ' << fa.pigNum() << ' ' << fa.money << std::endl;
 	for (const auto& pigs : fa.pens)
 		if (!pigs.empty())
 			os <<  pigs << std::endl;
