@@ -5,7 +5,10 @@
 #include <ctime>
 #include <vector>
 int main(void) {
-	farm::Factory fa(2000000000);
+	farm::Factory fa("save.txt","rec.txt",farm::Factory::old);
+	//std::fstream aa("save.txt", std::ios::in | std::ios::out);
+	//aa << "skljdflsdf";
+	
 	constexpr int choice = 0;
 	do {
 		farm::Pigs pigs(10);
@@ -14,8 +17,9 @@ int main(void) {
 		
 		fa.step();
 		fa.sellOut();
-	} while (fa.getMoney()>1000);
+	} while (fa.getDay()<30000);
 
-	std::cout << fa;
+	fa.save();
+	
 	return 0;
 }

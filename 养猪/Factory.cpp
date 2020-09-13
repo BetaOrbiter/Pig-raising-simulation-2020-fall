@@ -1,9 +1,18 @@
 #include "Factory.h"
 #include <algorithm>
+#include <fstream>
 #include <set>
-farm::Factory::Factory(std::istream& is):day(ntime), money(0)
+farm::Factory::Factory(const char* saveName, const char* recordName, int mode) :
+	day(0), money(50000), savingName(saveName), recordName(recordName)
 {
-	is >> *this;
+	if (old == mode) {
+		std::ifstream inf(savingName, std::ios::in);
+		inf >> *this;
+	}
+	else {
+		std::ofstream aa(savingName, std::ios::trunc);//删除原存档
+		std::ofstream aaa(recordName, std::ios::trunc);//删除原记录
+	}
 }
 farm::SizeType farm::Factory::pigNum(void) const
 {
@@ -23,24 +32,30 @@ farm::SizeType farm::Factory::pigNum(farm::SizeType penNum) const
 bool farm::Factory::purChase(Pigs::ptrToPig& victim) {
 	if (money < victim->getCost())
 		return false;
-	money -= victim->getCost();
 	if (false == distribute(victim))
 		return false;
+	money -= victim->getCost();
+	std::ofstream(recordName, std::ios::app) << "day " << day << " buy:" << std::endl << *victim << std::endl;
 	return true;
 }
 
 void farm::Factory::sellOut(void) {
 	std::set<farm::SizeType> penNums;
+	std::ofstream record(recordName, std::ios::app);
+	record << "day " << day << " sell:" << std::endl;
 	for (auto& pigs : kindIndex) {
 		auto newEnd = std::partition(pigs.begin(), pigs.end(), [this, &penNums](Pigs::ptrToPig p) {
 			if (p->isMature(day) && p->isHealthy() && !pens[p->getLocation()].getIllNum()) {
 				penNums.insert(p->getLocation());
 				return false;
 			}
-			return true; 
+			return true;
 			});
 
-		std::for_each(newEnd, pigs.end(), [this](const Pigs::ptrToPig& ptr) {money += ptr->getValue(); });
+		std::for_each(newEnd, pigs.end(), [this,&record](const Pigs::ptrToPig& ptr)
+			{
+				record << *ptr << std::endl;
+				money += ptr->getValue(); });
 		pigs.erase(newEnd, pigs.end());
 	}
 	for (auto num : penNums) {
@@ -82,7 +97,7 @@ void farm::Factory::sell(farm::Color k)
 	for (auto num : penNums) {
 		auto& pen = pens[num];
 		for (auto iter = pen.begin(); iter != pen.end();)
-			if ((*iter)->isMature(day) && (*iter)->isHealthy() && (*iter)->getColor()==k)
+			if ((*iter)->isMature(day) && (*iter)->isHealthy() && (*iter)->getColor() == k)
 				iter = pen.erase(iter);
 			else
 				iter++;
@@ -116,7 +131,7 @@ bool farm::Factory::spread(const farm::SizeType& pos, const int possibility) {
 			iter = pen.erase(iter);
 		}
 		else {
-			if ((*iter)->isHealthy() && (rand()%100 < possibility)) {
+			if ((*iter)->isHealthy() && (rand() % 100 < possibility)) {
 				flg = true;
 				(*iter)->setIll(day);
 				pen.illNum++;
@@ -125,6 +140,11 @@ bool farm::Factory::spread(const farm::SizeType& pos, const int possibility) {
 			iter++;
 		}
 	return true;
+}
+
+void farm::Factory::save(void)
+{
+	std::ofstream(savingName) << *this;
 }
 
 void farm::Factory::step(void)
@@ -146,14 +166,6 @@ void farm::Factory::step(void)
 	}
 
 
-	if (5 > rand() % 1000) {//每天有0.5%的可能爆发新猪瘟
-		farm::SizeType pos = rand() % 100;
-		while (pens[pos].empty())
-			pos = rand() % 100;
-		quarantine.insert(pos);
-		//std::cout << "新疫情爆发于" << pos << "号猪圈！" << std::endl;
-	}
-
 	std::vector<farm::SizeType> newpos;
 	for (auto qua = quarantine.begin(); qua != quarantine.end();) {
 		spread(*qua, 50);
@@ -163,13 +175,21 @@ void farm::Factory::step(void)
 		if (*qua < 99)
 			if (spread(*qua + 1, 15))
 				newpos.push_back(*qua + 1);
-		
+
 		if (pens[*qua].empty()) qua = quarantine.erase(qua);
 		else qua++;
 	}
 	for (auto pos : newpos)
 		quarantine.insert(pos);
 	day++;
+}
+
+farm::SizeType farm::Factory::BreakOut(void) {
+	farm::SizeType pos = rand() % 100;
+	while (pens[pos].empty())
+		pos = rand() % 100;
+	quarantine.insert(pos);
+	return  pos;
 }
 
 bool farm::Factory::distribute(Pigs::ptrToPig& p) {
@@ -183,8 +203,8 @@ bool farm::Factory::distribute(Pigs::ptrToPig& p) {
 			continue;
 		}
 		if (((farm::black == p->getColor() && farm::black == pen[0]->getColor()) ||
-			(farm::black != p->getColor() && farm::black != pen[0]->getColor())) 
-			&& !pen.getIllNum() && pen.size()<9)
+			(farm::black != p->getColor() && farm::black != pen[0]->getColor()))
+			&& !pen.getIllNum() && pen.size() < 9)
 			ablePos.push_back(pos);
 	}
 
@@ -202,11 +222,11 @@ std::istream& farm::operator>>(std::istream& is, Factory& fa)
 	farm::SizeType pigNum;
 	is >> fa.day >> pigNum >> fa.money;
 	Pigs tmp;
-	while(is >> tmp)
-	for (auto& pig : tmp) {
-		fa.kindIndex[pig->getColor()].add(pig);
-		fa.pens[pig->getLocation()].add(pig);
-	}
+	while (is >> tmp)
+		for (auto& pig : tmp) {
+			fa.kindIndex[pig->getColor()].add(pig);
+			fa.pens[pig->getLocation()].add(pig);
+		}
 	return is;
 }
 
@@ -215,6 +235,6 @@ std::ostream& farm::operator<<(std::ostream& os, const Factory& fa)
 	os << fa.day << ' ' << fa.pigNum() << ' ' << fa.money << std::endl;
 	for (const auto& pigs : fa.pens)
 		if (!pigs.empty())
-			os <<  pigs << std::endl;
+			os << pigs << std::endl;
 	return os;
 }

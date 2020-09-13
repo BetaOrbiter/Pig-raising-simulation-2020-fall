@@ -5,7 +5,7 @@ static constexpr char const* healthName[]{ "ill","healthy" };
 std::ostream& operator<<(std::ostream& os, const BasicPig& p)
 {
 	return os << colorName[p.color] << "   " << p.weight << "   " << p.penNum << ' ' << p.entryTime << ' '
-		<< healthName[p.health] << "   " << p.illTime;
+		<< healthName[p.health] << "   " << ((ntime == p.illTime)?(-1):(static_cast<int>(p.illTime)));
 }
 
 std::istream& operator>>(std::istream& is, BasicPig& p)
