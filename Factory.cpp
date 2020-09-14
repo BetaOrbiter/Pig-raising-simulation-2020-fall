@@ -131,7 +131,7 @@ bool farm::Factory::spread(const farm::SizeType& pos, const int possibility) {
 			iter = pen.erase(iter);
 		}
 		else {
-			if ((*iter)->isHealthy() && (rand() % 100 < possibility)) {
+            if ((*iter)->isHealthy() && ((rand()%100) < possibility)) {
 				flg = true;
 				(*iter)->setIll(day);
 				pen.illNum++;
@@ -139,7 +139,7 @@ bool farm::Factory::spread(const farm::SizeType& pos, const int possibility) {
 			}
 			iter++;
 		}
-	return true;
+    return flg;
 }
 
 void farm::Factory::save(void)

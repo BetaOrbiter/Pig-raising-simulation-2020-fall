@@ -1,2 +1,0 @@
-day 0 buy:
-white weight: 61 location: 91 entryTime: 0 healthy illtime: -1

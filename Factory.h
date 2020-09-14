@@ -5,7 +5,8 @@
 #include "Typedef.h"
 #include "Pigs.h"
 namespace farm {
-	class Factory
+    class
+            Factory
 	{
 	public:
 		static constexpr int newF = 0;
@@ -19,8 +20,8 @@ namespace farm {
 		farm::MoneyType money;
 		Time day;
 
-		const char *savingName;
-		const char *recordName;
+        const std::string savingName;
+        const std::string recordName;
 	public://成员函数
 		//Factory(farm::MoneyType m = 10000) :money(m),day(0) {};
 		Factory(const char* saveName, const char* recordName, int mode);
@@ -53,7 +54,7 @@ namespace farm {
 		void kill(farm::SizeType penNum);//扑杀
 
 		Pigs& operator[](const farm::SizeType penNum) { return pens[penNum]; }
-		Pigs& operator[](const farm::Color col) { return kindIndex[col]; }
+        Pigs& operator[](const farm::Color col) { return kindIndex[col]; }
 
 		friend std::ostream& operator<<(std::ostream& os, const Factory& fa);
 		friend std::istream& operator>>(std::istream& is, Factory& fa);

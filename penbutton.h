@@ -8,12 +8,11 @@ class penButton : public QPushButton
     Q_OBJECT
 public:
     explicit penButton(QWidget *parent = nullptr);
-    int penNum;
+    size_t penNum;
 
 signals:
 
 private:
-    static int count;
 };
 
 #endif // OENBUTTON_H

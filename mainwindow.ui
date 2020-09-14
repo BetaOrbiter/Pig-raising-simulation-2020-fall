@@ -301,7 +301,14 @@
            <item>
             <widget class="QPushButton" name="purchase">
              <property name="text">
-              <string>购买</string>
+              <string>手动购买</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="autoPur">
+             <property name="text">
+              <string>自动购买</string>
              </property>
             </widget>
            </item>
