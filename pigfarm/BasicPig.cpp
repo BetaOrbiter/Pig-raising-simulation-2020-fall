@@ -2,16 +2,17 @@
 #include <cstring>
 static constexpr  char const* colorName[]{ "black","stripe","white" };
 static constexpr char const* healthName[]{ "ill","healthy" };
+
 std::ostream& operator<<(std::ostream& os, const BasicPig& p)
 {
-	return os << colorName[p.color] << "   " << p.weight << "   " << p.penNum << ' ' << p.entryTime << ' '
-		<< healthName[p.health] << "   " << ((ntime == p.illTime)?(-1):(static_cast<int>(p.illTime)));
+	return os << colorName[p.color] << " weight: " << p.weight << " location: " << static_cast<long long>(p.penNum) << " entryTime: " << static_cast<long long>(p.entryTime) << ' '
+		<< healthName[p.health] << " illtime: " << static_cast<long long>(p.illTime);
 }
 
 std::istream& operator>>(std::istream& is, BasicPig& p)
 {
-	char colorIn[7], healthIn[8];
-	is >> colorIn >> p.weight >> p.penNum >> p.entryTime >> healthIn >> p.illTime;
+	char colorIn[7], healthIn[8], useless[30];
+	is >> colorIn >> useless >> p.weight >> useless >> p.penNum >> useless >> p.entryTime >> healthIn >> useless >> p.illTime;
 	for(int i=0;i<3;i++)
 		if (!strncmp(colorName[i], colorIn, 6)) {
 			p.color = static_cast<farm::Color>(i);

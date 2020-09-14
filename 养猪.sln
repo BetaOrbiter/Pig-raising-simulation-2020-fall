@@ -1,31 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30413.136
+VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "养猪", "养猪\养猪.vcxproj", "{5254CB71-4D6B-4D09-8F13-92C136744EFB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pigfarm", "pigfarm\pigfarm.vcxproj", "{FD3908F9-43AB-4324-9878-D720729DEE79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Debug|x64.ActiveCfg = Debug|x64
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Debug|x64.Build.0 = Debug|x64
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Debug|x86.ActiveCfg = Debug|Win32
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Debug|x86.Build.0 = Debug|Win32
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Release|x64.ActiveCfg = Release|x64
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Release|x64.Build.0 = Release|x64
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Release|x86.ActiveCfg = Release|Win32
-		{5254CB71-4D6B-4D09-8F13-92C136744EFB}.Release|x86.Build.0 = Release|Win32
+		{FD3908F9-43AB-4324-9878-D720729DEE79}.Debug|x64.ActiveCfg = Debug|x64
+		{FD3908F9-43AB-4324-9878-D720729DEE79}.Debug|x64.Build.0 = Debug|x64
+		{FD3908F9-43AB-4324-9878-D720729DEE79}.Release|x64.ActiveCfg = Release|x64
+		{FD3908F9-43AB-4324-9878-D720729DEE79}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {7FE9006D-E5EE-4070-8CA8-886245A6D7B2}
+		SolutionGuid = {3711F51D-69A1-4237-AF53-E49082F1A86D}
 	EndGlobalSection
 EndGlobal

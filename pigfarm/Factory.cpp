@@ -3,7 +3,7 @@
 #include <fstream>
 #include <set>
 farm::Factory::Factory(const char* saveName, const char* recordName, int mode) :
-	day(0), money(50000), savingName(saveName), recordName(recordName)
+	day(0), money(500000), savingName(saveName), recordName(recordName)
 {
 	if (old == mode) {
 		std::ifstream inf(savingName, std::ios::in);

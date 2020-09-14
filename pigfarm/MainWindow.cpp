@@ -6,6 +6,9 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <qinputdialog.h>
+#include <qtextbrowser.h>
+#include <qtextstream.h>
 #include "Factory.h"
 
 MainWindow::MainWindow(QWidget* parent)
@@ -15,10 +18,15 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
+    //每秒做的事情
     connect(timer, &QTimer::timeout, [=]() {
-        fa->purChase(farm::Pigs(10)[0]);
+        do {
+            farm::Pigs pigs(1);
+            fa->purChase(farm::Pigs(10)[0]);
+        } while (fa->getMoney() > 30000);
         fa->step();
-        fa->sellOut();
+        if(!(fa->getDay()%90))
+            fa->sellOut();
 
         ui->money->setText(QString("钱： %1").arg(fa->getMoney()));
         ui->num->setText(QString("总数： %1").arg(fa->pigNum()));
@@ -52,12 +60,36 @@ MainWindow::MainWindow(QWidget* parent)
                 fa->kill(pos);
         }
         });
-
+    
+    //查询账本按钮
     connect(ui->inqure, &QPushButton::clicked,
         [=]() {
-            
+            QFile file("record.txt");
+            file.open(QIODevice::ReadOnly);
+            QTextBrowser *text = new QTextBrowser;
+            text->setText(QTextStream(&file).readAll());
+            text->resize(600, 600);
+            text->show();
         });
 
+    //购买按钮
+    connect(ui->purchase, &QPushButton::clicked,
+        [=]() {
+            QString title = QStringLiteral("买猪");
+            farm::Pigs pigs(10);
+            std::stringstream ss;
+            ss << pigs;
+            std::string qs, tmp;
+            while (!ss.eof()) {
+                std::getline(ss, tmp);
+                tmp.push_back('\n');
+                qs.append(tmp);
+            }
+            int i = QInputDialog::getInt(this, title, qs.c_str(), 0, 0, 9);
+            fa->purChase(pigs[i]);
+        });
+
+    //一百个猪圈按钮
     penButton* ppp[100];
     {
         ppp[0] = ui->pen_0;
@@ -173,7 +205,7 @@ MainWindow::MainWindow(QWidget* parent)
                     tmp.push_back('\n');
                     qs.append(tmp);
                 }
-                QMessageBox::information(this, QString("%1").arg(ppp[i]->penNum), QString(qs.c_str()));
+                QMessageBox::information(this, QString("%1 号圈").arg(ppp[i]->penNum), QString(qs.c_str()));
             });
 }
 
@@ -197,7 +229,7 @@ void MainWindow::on_begstop_clicked()
     }
     else {
         ui->begstop->setText("暂停");
-        timer->start(200);
+        timer->start(500);
     }
 }
 

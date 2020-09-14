@@ -72,7 +72,9 @@ farm::Pigs::iterator farm::Pigs::erase(const ptrToPig& ptr)
 std::istream& farm::operator>>(std::istream& is, farm::Pigs& ps)
 {
 	farm::SizeType size;
-	is >> size >> ps.illNum >> ps.totalWeight;
+	char useless[30];
+	is >> size >> useless >> useless >> useless >> useless >> useless >> ps.illNum >> useless;
+	is >> useless >> useless >> ps.totalWeight >> useless;
 	ps.Index.resize(0);
 	for (farm::SizeType i = 0; i < size; i++)
 		ps.Index.push_back(std::make_shared<BasicPig>(is));
@@ -81,8 +83,8 @@ std::istream& farm::operator>>(std::istream& is, farm::Pigs& ps)
 
 std::ostream& farm::operator<<(std::ostream& os, const farm::Pigs& ps)
 {
-	os << /*"We have  <<*/ ps.Index.size() << /*" pigs in this set with "*/" " << ps.illNum << ' ';// << /*" ill pig."*/ << std::endl;
-	os << /*"Its total weight is  <<*/ ps.totalWeight << /*" catty."*/" " << std::endl;
+	os << ps.Index.size() << " pigs in this set with " << ps.illNum << " ill" << std::endl;
+	os << "total weight: " << ps.totalWeight << " catty." << std::endl;
 	for (const auto pig : ps.Index)
 		os << *pig << std::endl;
 	return os;
