@@ -20,8 +20,7 @@ SOURCES += \
     Factory.cpp \
     Pigs.cpp \
     main.cpp \
-    mainwindow.cpp \
-    penbutton.cpp
+    mainwindow.cpp
 
 HEADERS += \
     BasicPig.h \

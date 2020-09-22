@@ -7,8 +7,8 @@ class penButton : public QPushButton
 {
     Q_OBJECT
 public:
-    explicit penButton(QWidget *parent = nullptr);
-    size_t penNum;
+    explicit penButton(QWidget *parent = nullptr): QPushButton(parent){}
+    size_t penNum;//该按钮对应的猪圈编号
 
 signals:
 

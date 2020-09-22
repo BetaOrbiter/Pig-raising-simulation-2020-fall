@@ -17,24 +17,24 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_load_clicked();
+    void on_load_clicked();//按钮：读取存档
 
 
-    void on_begstop_clicked();
+    void on_begstop_clicked(); //按钮：暂停、继续游戏
 
-    void on_returnMain_clicked();
+    void on_returnMain_clicked();//按钮：保存游戏并返回主界面
 
-    void on_newGame_clicked();
+    void on_newGame_clicked();//按钮：创建新游戏
 
-    void on_save_clicked();
+    void on_save_clicked();//按钮：保存游戏
 
-    void on_autoPur_clicked();
+    void on_autoPur_clicked();//按钮：自动购买开关
 
-    void on_explation_clicked();
+    void on_explation_clicked();//按钮：弹出游戏说明
 
-    void on_purchase_clicked();
+    void on_purchase_clicked();//按钮：手动买猪
 
-    void on_inqure_clicked();
+    void on_inqure_clicked();//按钮：查询流水
 
 protected:
     void closeEvent(QCloseEvent* event);

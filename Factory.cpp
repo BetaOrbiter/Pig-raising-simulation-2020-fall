@@ -44,16 +44,13 @@ void farm::Factory::sellOut(void) {
 	std::ofstream record(recordName, std::ios::app);
 	record << "day " << day << " sell:" << std::endl;
 	for (auto& pigs : kindIndex) {
-		auto newEnd = std::partition(pigs.begin(), pigs.end(), [this, &penNums](Pigs::ptrToPig p) {
-			if (p->isMature(day) && p->isHealthy() && !pens[p->getLocation()].getIllNum()) {
-				penNums.insert(p->getLocation());
-				return false;
-			}
-			return true;
+        auto newEnd = std::partition(pigs.begin(), pigs.end(), [this](Pigs::ptrToPig p) {
+                return p->isMature(day) && p->isHealthy() && !pens[p->getLocation()].getIllNum();
 			});
 
-		std::for_each(newEnd, pigs.end(), [this,&record](const Pigs::ptrToPig& ptr)
+        std::for_each(newEnd, pigs.end(), [this, &record, &penNums](const Pigs::ptrToPig& ptr)
 			{
+                penNums.insert(ptr->getLocation());
 				record << *ptr << std::endl;
 				money += ptr->getValue(); });
 		pigs.erase(newEnd, pigs.end());
@@ -149,22 +146,15 @@ void farm::Factory::save(void)
 
 void farm::Factory::step(void)
 {
-	farm::WeightType a[100] = { 0 };
-	farm::MoneyType b[100] = { 0 };
 	for (auto& k : kindIndex)
 		for (auto& pig : k) {
 			const farm::WeightType dw = pig->gainWeight();
 			const farm::MoneyType dv = dw * BasicPig::getUnitValue(pig->getColor());
 			k.totalWeight += dw;
 			k.totalValue += dv;
-			a[pig->getLocation()] += dw;
-			b[pig->getLocation()] += dv;
+            pens[pig->getLocation()].totalWeight += dw;
+            pens[pig->getLocation()].totalValue += dv;
 		}
-	for (int i = 0; i < 100; i++) {
-		pens[i].totalWeight += a[i];
-		pens[i].totalValue += b[i];
-	}
-
 
 	std::vector<farm::SizeType> newpos;
 	for (auto qua = quarantine.begin(); qua != quarantine.end();) {
@@ -179,8 +169,7 @@ void farm::Factory::step(void)
 		if (pens[*qua].empty()) qua = quarantine.erase(qua);
 		else qua++;
 	}
-	for (auto pos : newpos)
-		quarantine.insert(pos);
+    quarantine.insert(newpos.cbegin(),newpos.cend());
 	day++;
 }
 
@@ -195,11 +184,12 @@ farm::SizeType farm::Factory::BreakOut(void) {
 bool farm::Factory::distribute(Pigs::ptrToPig& p) {
 	farm::SizeType pos;
 	std::vector<farm::SizeType> ablePos;
+    ablePos.reserve(100);
 
 	for (pos = 0; pos < pens.size(); pos++) {
 		auto& pen = pens[pos];
 		if (pen.empty()) {
-			ablePos.push_back(pos);
+            ablePos.push_back(pos);
 			continue;
 		}
 		if (((farm::black == p->getColor() && farm::black == pen[0]->getColor()) ||
