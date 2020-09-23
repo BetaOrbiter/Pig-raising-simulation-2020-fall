@@ -10,7 +10,7 @@
 #include <qtextbrowser.h>
 #include <qtextstream.h>
 #include "Factory.h"
-
+#include "pen.h"
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -171,19 +171,11 @@ MainWindow::MainWindow(QWidget* parent)
     //一百个猪圈按钮
     for (int i = 0; i <= 99; i++) {
         ppp[i]->penNum = i;
-        connect(ppp[i], &QPushButton::clicked,
-            [=]() {
-                const auto& pigs = (*fa)[ppp[i]->penNum];
-                std::stringstream ss;
-                ss << pigs;
-                std::string qs, tmp;
-                while (!ss.eof()) {
-                    std::getline(ss, tmp);
-                    tmp.push_back('\n');
-                    qs.append(tmp);
-                }
-                QMessageBox::information(this, QString("%1 号圈").arg(ppp[i]->penNum), QString(qs.c_str()));
-            });
+        connect(ppp[i],&QPushButton::clicked,
+                [=](){
+            auto p = new pen((*fa)[ppp[i]->penNum]);
+            p->show();
+        });
     }
 }
 

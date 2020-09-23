@@ -20,7 +20,8 @@ SOURCES += \
     Factory.cpp \
     Pigs.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    pen.cpp
 
 HEADERS += \
     BasicPig.h \
@@ -28,10 +29,12 @@ HEADERS += \
     Pigs.h \
     Typedef.h \
     mainwindow.h \
+    pen.h \
     penbutton.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    pen.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

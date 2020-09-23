@@ -29,6 +29,7 @@ namespace farm {
 		bool empty(void) const { return Index.empty(); }
 		farm::SizeType size(void) const { return Index.size(); }
 		ptrToPig& operator[](farm::SizeType s) { return Index[s]; }
+        const ptrToPig& operator[](farm::SizeType s)const { return Index[s]; }
 		iterator begin() {return Index.begin();}
 		iterator end() { return Index.end(); }
 

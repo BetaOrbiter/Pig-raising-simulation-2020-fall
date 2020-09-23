@@ -222,6 +222,7 @@ Makefile: PigFarm.pro ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\win32-msvc\qm
 		..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\qt_config.prf \
 		..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\win32-msvc\qmake.conf \
 		..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\spec_post.prf \
+		.qmake.stash \
 		..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\exclusive_builds.prf \
 		..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\common\msvc-version.conf \
 		..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\toolchain.prf \
@@ -396,6 +397,7 @@ Makefile: PigFarm.pro ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\win32-msvc\qm
 ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\qt_config.prf:
 ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\win32-msvc\qmake.conf:
 ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\spec_post.prf:
+.qmake.stash:
 ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\exclusive_builds.prf:
 ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\common\msvc-version.conf:
 ..\..\Qt\Qt5.12.9\5.12.9\msvc2017_64\mkspecs\features\toolchain.prf:
