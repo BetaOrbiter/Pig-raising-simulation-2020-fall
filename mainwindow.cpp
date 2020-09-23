@@ -187,10 +187,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_load_clicked()
 {
-    name = QInputDialog::getText(this ,"读取存档","输入存档名");
-    const std::string s= name.toStdString();
-    fa = new farm::Factory((s+"save.txt").c_str(), (s+"record.txt").c_str(), farm::Factory::old);
-    ui->stackedWidget->setCurrentIndex(1);
+    bool flg = true;
+    name = QInputDialog::getText(this ,"新建存档","输入存档名", QLineEdit::Normal,QString(),&flg);
+    if(flg){
+        const std::string s= name.toStdString();
+        fa = new farm::Factory((s+"save.txt").c_str(), (s+"record.txt").c_str(), farm::Factory::old);
+        ui->stackedWidget->setCurrentIndex(1);
+    }
 }
 
 void MainWindow::on_begstop_clicked()
@@ -215,10 +218,13 @@ void MainWindow::on_returnMain_clicked()
 
 void MainWindow::on_newGame_clicked()
 {
-    name = QInputDialog::getText(this ,"新建存档","输入存档名");
-    const std::string s= name.toStdString();
-    fa = new farm::Factory((s+"save.txt").c_str(), (s+"record.txt").c_str(), farm::Factory::newF);
-    ui->stackedWidget->setCurrentIndex(1);
+    bool flg = true;
+    name = QInputDialog::getText(this ,"新建存档","输入存档名", QLineEdit::Normal,QString(),&flg);
+    if(flg){
+        const std::string s= name.toStdString();
+        fa = new farm::Factory((s+"save.txt").c_str(), (s+"record.txt").c_str(), farm::Factory::newF);
+        ui->stackedWidget->setCurrentIndex(1);
+    }
 }
 
 void MainWindow::on_save_clicked()
@@ -249,7 +255,6 @@ void MainWindow::on_autoPur_clicked()
 
 void MainWindow::on_explation_clicked()
 {
-    //QMessageBox::information(this," "," ");
     const QString s("小明开了个养猪场，一共有100个猪圈（按照0-99编号），每个猪圈最多养10头猪（按照0到9编号），猪一共有三个品种：黑猪、小花猪和大花白猪，其中黑猪不能与其他两种猪放在一个猪圈里，会打架。规定每3个月，养猪场要出圈一批猪，包括：体重超过150斤的和饲养超过1年的；同时补充一批猪崽儿（猪的品种、数量录入或者选择随机生成）。试利用随机数方法构造猪崽儿的初始体重等信息（20-50kg），利用随机数方法按照秒或次数刷新每头猪随时间的体重增长函数（一秒/一次表示一天，一天增重0.0 ~1.2kg）。");
     QMessageBox::information(this, QString("游戏说明"), s);
 }
